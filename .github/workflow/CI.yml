@@ -1,0 +1,49 @@
+name: CI
+
+# Run on every push to main and on every pull request
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test-pipeline:
+    runs-on: ubuntu-latest
+
+    # Login shell so the conda environment activates in every step
+    defaults:
+      run:
+        shell: bash -el {0}
+
+    steps:
+      # 1. Download a copy of your repository onto GitHub's machine
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      # 2. Install conda and build the environment from environment.yml
+      - name: Set up conda environment
+        uses: conda-incubator/setup-miniconda@v3
+        with:
+          miniforge-version: latest
+          environment-file: environment.yml
+          activate-environment: rnaseq
+
+      # 3. Check the Snakefile
+      - name: Lint Snakefile
+        run: snakemake --lint
+
+      # 4. Dry run: confirms every rule connects without running anything
+      - name: Dry run
+        run: snakemake -n --configfile config/test_config.yaml
+
+      # 5. Run the full pipeline on test data
+      - name: Run pipeline on test data
+        run: snakemake --cores 2 --use-conda --configfile config/test_config.yaml
+
+      # 6. Save the figures
+      - name: Upload test figures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-figures
+          path: results/figures/
