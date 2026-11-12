@@ -1,1 +1,8 @@
-
+name: RNAseq
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - fastp
+  - fastqc
+  - multiqc
