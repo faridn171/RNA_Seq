@@ -1,1 +1,60 @@
 
+# Define a list of sample names
+SAMPLES = ["sample_A", "sample_B", "sample_C"]
+
+# 1. Target rule: Defines the final files you want Snakemake to build
+rule all:
+    input:
+        "results/final_summary.txt"
+
+# 2. Trim:
+rule clean_data:
+    input:
+        "test_data/{sample}.csv"
+    output:
+        "data/cleaned/{sample}_clean.csv"
+    params:
+        threshold=10
+    threads: 2
+    shell:
+        "python scripts/clean.py --input {input} --output {output} --min {params.threshold}"
+
+# 3. FastQC:
+    input:
+        expand("data/cleaned/{sample}_clean.csv", sample=SAMPLES)
+    output:
+        "results/final_summary.txt"
+    shell:
+        "cat {input} > {output}"
+
+# 4. HISAT2:
+    input:
+        expand("data/cleaned/{sample}_clean.csv", sample=SAMPLES)
+    output:
+        "results/final_summary.txt"
+    shell:
+        "cat {input} > {output}"
+
+# 5. featureCounts:
+    input:
+        expand("data/cleaned/{sample}_clean.csv", sample=SAMPLES)
+    output:
+        "results/final_summary.txt"
+    shell:
+        "cat {input} > {output}"
+
+# 5. deseq2:
+    input:
+        expand("data/cleaned/{sample}_clean.csv", sample=SAMPLES)
+    output:
+        "results/final_summary.txt"
+    shell:
+        "cat {input} > {output}"
+
+# 6. clusterProfiler:
+    input:
+        expand("data/cleaned/{sample}_clean.csv", sample=SAMPLES)
+    output:
+        "results/final_summary.txt"
+    shell:
+        "cat {input} > {output}"
